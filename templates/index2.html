@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encryption Tool</title>
+</head>
+<body>
+    <h2>Encrypt/Decrypt Data</h2>
+    
+    <form id="encryptForm">
+        <label>Input type</label>
+        <select name="ipmode" id="ipmode">
+            <option value="text" selected>Text</option>
+            <option value="file">File</option>
+        </select>
+        <br><br>
+
+        <label>Enter the Text</label><br>
+        <textarea name="iptext" id="iptext" rows="5" cols="30"></textarea>
+        <br><br>
+
+        <input type="file" name="ipfile" id="ipfile">
+        <br><br>
+
+        <label>Encryption Mode:</label>
+        <select name="mode" id="mode">
+            <option value="simple">Simple mode</option>
+            <option value="advanced">Advanced Mode</option>
+        </select>
+        <br><br>
+
+        <label>Algorithm:</label>
+        <select name="algorithm" id="algorithm">
+            <option value="1">AES</option>
+            <option value="2">3DES</option>
+            <option value="3">Blowfish</option>
+            <option value="4">Twofish</option>
+        </select>
+        <br><br>
+
+        <label>Block Size:</label>
+        <select name="blocksize" id="blocksize">
+            <option value="16">128 Bit</option>
+        </select>
+        <br><br>
+
+        <label>Key Size:</label>
+        <select name="keysize" id="keysize">
+            <option value="8">64 Bit</option>
+            <option value="24">192 Bit</option>
+            <option value="16">128 Bit</option>
+            <option value="32">256 Bit</option>
+        </select>
+        <br><br>
+
+        <label>Initialization Vector</label>
+        <input type="text" name="iv" id="iv">
+        <label>Key Value</label>
+        <input type="text" name="kvalue" id="kvalue">
+        <br><br>
+
+        <button type="submit" id="submitBtn">Encrypt</button>
+    </form>
+
+    <h3>Result:</h3>
+    <pre id="result"></pre>
+
+    <div id="linkContainer"></div>
+    <div id="linkContainer2"></div> <!-- Encrypted file download button will appear here -->
+
+    <script>
+        document.getElementById("encryptForm").addEventListener("submit", async function(event) {
+            event.preventDefault(); // Prevent form from refreshing the page
+            
+            let formData = new FormData(this);
+
+            try {
+                let response = await fetch("http://localhost:5000/uploader/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                let result = await response.json();
+
+                // Display response data
+                document.getElementById("result").innerHTML = "<b>Server Response:</b> " + JSON.stringify(result.Data, null, 2);
+
+                // Extract encrypted file name from response
+                if (result.Data && result.Data.encryptedFile) {
+                    const serverAddress = "http://localhost:5000"; // Change to your actual server IP if needed
+                    const fileUrl = `${serverAddress}/download/${result.Data.encryptedFile}`;
+
+                    // Create a new button for downloading the file
+                    const linkButton = document.createElement("a");
+                    linkButton.href = fileUrl;
+                    linkButton.textContent = "Download Encrypted File";
+                    linkButton.target = "_blank"; // Open in new tab
+                    linkButton.style.display = "inline-block";
+                    linkButton.style.marginTop = "10px";
+                    linkButton.style.padding = "10px";
+                    linkButton.style.backgroundColor = "#007bff";
+                    linkButton.style.color = "#fff";
+                    linkButton.style.textDecoration = "none";
+                    linkButton.style.borderRadius = "5px";
+
+                    // Add button to the page
+                    const linkContainer = document.getElementById("linkContainer");
+                    linkContainer.innerHTML = ""; // Remove previous button (if any)
+                    linkContainer.appendChild(linkButton);
+                }
+
+		// Extract encrypted file name from response
+                if (result.Data && result.Data.encryptedHexFile) {
+                    const serverAddress = "http://localhost:5000"; // Change to your actual server IP if needed
+                    const fileUrl = `${serverAddress}/download/${result.Data.encryptedHexFile}`;
+
+                    // Create a new button for downloading the file
+                    const linkButton2 = document.createElement("a");
+                    linkButton2.href = fileUrl;
+                    linkButton2.textContent = "Download Encrypted Hex File";
+                    linkButton2.target = "_blank"; // Open in new tab
+                    linkButton2.style.display = "inline-block";
+                    linkButton2.style.marginTop = "10px";
+                    linkButton2.style.padding = "10px";
+                    linkButton2.style.backgroundColor = "#007bff";
+                    linkButton2.style.color = "#fff";
+                    linkButton2.style.textDecoration = "none";
+                    linkButton2.style.borderRadius = "5px";
+
+                    // Add button to the page
+                    const linkContainer = document.getElementById("linkContainer2");
+                    linkContainer.innerHTML = ""; // Remove previous button (if any)
+                    linkContainer.appendChild(linkButton2);
+                }
+
+            } catch (error) {
+                document.getElementById("result").innerHTML = "<b>Error:</b> " + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
